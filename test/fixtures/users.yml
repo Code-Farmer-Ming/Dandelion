@@ -1,0 +1,21 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  id: 1
+  nick_name: one
+  email: one@mail.com
+  password: one
+
+two:
+  id: 2
+  nick_name: two
+  email: two@mail.com
+  password: two
+  
+three:
+  id: 3
+  nick_name: three
+  email: three@mail.com
+  password: three
+  last_position_x: 2
+  last_position_y: 2
