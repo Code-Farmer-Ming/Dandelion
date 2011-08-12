@@ -59,7 +59,6 @@ class User < ActiveRecord::Base
   
   #获取消息 包新的和要删除的
   def  get_msgs(page=1)
-    page = page || 1
     uncatch_msgs = get_uncatch_msgs(page)
     del_msgs = get_useless_msgs()
     if page>1
