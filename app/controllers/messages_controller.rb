@@ -2,13 +2,7 @@ class MessagesController < ApplicationController
   # GET /messages
   # GET /messages.xml
   def index
-    
-#    uncatch_msgs = Message.get_uncatch_msgs(current_user)
-#    current_user.catch_msgs << uncatch_msgs
-#    useless_msgs = Message.get_useless_msgs(current_user)
-#    
-#    current_user.catch_msgs.delete(useless_msgs)
-    @messages =  current_user.get_msgs
+    @messages =  current_user.get_msgs(params[:page])
 
     respond_to do |format|
       format.html # index.html.erb

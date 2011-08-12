@@ -1,6 +1,7 @@
 class User < ActiveRecord::Base
   #1000米
   DISTANCE=0.1000
+  PAGE_SIZE=20
   validates_uniqueness_of     :email, :message=>"邮件已被注册"
    
   has_attached_file :photo ,
@@ -34,8 +35,11 @@ class User < ActiveRecord::Base
   
   def photo_url
     url = photo.url()
-#    #url.blank? ? url : "http://www.beijuyo.com#{url}"
-	url.blank? ? url : "http://10.0.2.2:3000#{url}"
+    if Rails.env.production?
+      url.blank? ? url : "http://www.beijuyo.com#{url}"
+    else
+      url.blank? ? url : "http://10.0.2.2:3000#{url}"
+    end
   end
   
   def is_reg_finished=value
@@ -54,10 +58,13 @@ class User < ActiveRecord::Base
   end
   
   #获取消息 包新的和要删除的
-  def  get_msgs()
-    uncatch_msgs = get_uncatch_msgs()
+  def  get_msgs(page=1)
+    page = page || 1
+    uncatch_msgs = get_uncatch_msgs(page)
     del_msgs = get_useless_msgs()
-   
+    if page>1
+      uncatch_msgs.each { |e| e.action='Insert'  }
+    end
     catch_msgs << uncatch_msgs
     catch_msgs.delete(del_msgs)
     uncatch_msgs+del_msgs
@@ -80,7 +87,8 @@ class User < ActiveRecord::Base
   def new_around_me_users()
     sql =<<SQL
      select a.*  from users a left join around_mes b on  a.id=b.user_id and b.my_id=#{id}  
-     where b.id is null and a.id<>#{id} and  MyDistance(#{last_position_x},#{last_position_y},a.last_position_x,a.last_position_y)<#{DISTANCE}  
+     where b.id is null and a.id<>#{id} and  MyDistance(#{last_position_x},#{last_position_y},a.last_position_x,a.last_position_y)<#{DISTANCE}
+     and a.is_online=true
 SQL
     users = User.find_by_sql(sql)
     around_me_users << users
@@ -102,12 +110,13 @@ SQL
   
  
   # 根据坐标 获取 消息
-  def get_uncatch_msgs()
+  def get_uncatch_msgs(page=1)
     #需要添加 进去的消息
     sql =<<SQL
      select a.*  from messages a left join msg_queues b on  a.id=b.message_id and b.user_id=#{id}
      where b.id is null and  MyDistance(#{last_position_x},#{last_position_y},a.position_x,a.position_y)<#{DISTANCE}
      order by a.created_at
+     limit #{page-1 * PAGE_SIZE},#{PAGE_SIZE}
 SQL
     Message.find_by_sql(sql)
  
