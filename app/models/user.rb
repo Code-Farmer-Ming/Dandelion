@@ -110,12 +110,13 @@ SQL
  
   # 根据坐标 获取 消息
   def get_uncatch_msgs(page=1)
+    page = page-1
     #需要添加 进去的消息
     sql =<<SQL
      select a.*  from messages a left join msg_queues b on  a.id=b.message_id and b.user_id=#{id}
      where b.id is null and  MyDistance(#{last_position_x},#{last_position_y},a.position_x,a.position_y)<#{DISTANCE}
      order by a.created_at
-     limit #{page-1 * PAGE_SIZE},#{PAGE_SIZE}
+     limit #{page * PAGE_SIZE},#{PAGE_SIZE}
 SQL
     Message.find_by_sql(sql)
  
